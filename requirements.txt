@@ -1,4 +1,4 @@
-joblib
-tensorflow
-Pillow
 streamlit
+pillow
+tensorflow
+joblib
