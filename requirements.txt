@@ -1,6 +1,6 @@
-streamlit==1.36.0
+streamlit
 joblib
 pillow
 numpy
-tensorflow>=2.7.0,<2.8.0
+tensorflow
 requests
