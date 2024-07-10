@@ -1,5 +1,5 @@
 streamlit
 pillow
 numpy
-tensorflow==2.6.0  # Adjust version as needed
+tensorflow
 joblib
