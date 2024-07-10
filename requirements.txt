@@ -2,3 +2,8 @@ streamlit
 pillow
 tensorflow
 joblib
+
+
+streamlit
+joblib
+streamlit_extras
