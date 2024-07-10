@@ -11,13 +11,19 @@ IMG_SIZE = (224, 224)
 
 # Define the paths to the models
 feature_extractor_path = "/Users/vernsin/mobilenetv2.h5"  # Replace with your actual path
-svm_model_path = "/Users/vernsin/best_model.joblib"  # Replace with your actual path
+best_model_path = "/Users/vernsin/best_model.joblib"  # Replace with your actual path
 
 # Load the feature extractor model
-feature_extractor = tf.keras.models.load_model(feature_extractor_path)
+try:
+    feature_extractor = tf.keras.models.load_model(feature_extractor_path)
+except Exception as e:
+    st.error(f"Error loading feature extractor model: {e}")
 
-# Load the SVM model
-svm_model = joblib.load(svm_model_path)
+# Load the best model (previously svm_model)
+try:
+    best_model = joblib.load(best_model_path)
+except Exception as e:
+    st.error(f"Error loading best model: {e}")
 
 # Define a function to preprocess an image
 def preprocess_image(image):
@@ -35,15 +41,14 @@ def preprocess_image(image):
     
     return img_array
 
-
 # Define a function to predict image class
 def predict_image(image_array):
     # Extract features using the pretrained model
     features = feature_extractor.predict(image_array)
     features = features.reshape((1, -1))
 
-    # Predict class using SVM model
-    prediction = svm_model.predict(features)
+    # Predict class using best model
+    prediction = best_model.predict(features)
     class_labels = ['Glass Bottle', 'Plastic Bottle', 'Tin Can']
     
     return class_labels[prediction[0]]
