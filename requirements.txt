@@ -4,3 +4,8 @@ pillow
 numpy
 tensorflow
 requests
+
+streamlit
+pillow
+tensorflow
+joblib
