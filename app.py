@@ -10,8 +10,8 @@ from io import BytesIO
 IMG_SIZE = (224, 224)
 
 # Define the paths to the models
-feature_extractor_path = "https://raw.githubusercontent.com/vern02/repository/branch/path/to/mobilenetv2.h5"
-svm_model_path = "https://raw.githubusercontent.com/vern02/repository/branch/path/to/best_model.joblib"
+feature_extractor_path = 'https://github.com/vern02/app/raw/main/mobilenetv2.h5'
+svm_model_path = 'https://github.com/vern02/app/raw/main/best_model.joblib'
 
 # Load the feature extractor model
 feature_extractor = tf.keras.models.load_model(feature_extractor_path)
