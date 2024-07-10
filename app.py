@@ -10,8 +10,8 @@ from io import BytesIO
 IMG_SIZE = (224, 224)
 
 # Define the paths to the models
-feature_extractor_path = "/Users/vernsin/mobilenetv2.h5"  # Replace with your actual path
-best_model_path = "/Users/vernsin/best_model.joblib"  # Replace with your actual path
+feature_extractor_path = "/path/to/your/mobilenetv2.h5"
+best_model_path = "/path/to/your/best_model.joblib"
 
 # Load the feature extractor model
 try:
@@ -19,7 +19,7 @@ try:
 except Exception as e:
     st.error(f"Error loading feature extractor model: {e}")
 
-# Load the best model (previously svm_model)
+# Load the best model
 try:
     best_model = joblib.load(best_model_path)
 except Exception as e:
