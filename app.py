@@ -11,7 +11,7 @@ IMG_SIZE = (224, 224)
 
 # Define the paths to the models
 feature_extractor_path = "/path/to/your/mobilenetv2.h5"
-best_model_path = "/path/to/your/best_model.joblib"
+best_model_path = "/path/to/your/best_model.pkl"  # Change to .pkl if it's a joblib serialized model
 
 # Load the feature extractor model
 try:
