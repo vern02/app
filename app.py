@@ -14,39 +14,52 @@ feature_extractor_path = "https://raw.githubusercontent.com/vern02/app/main/mobi
 svm_model_path = "https://raw.githubusercontent.com/vern02/app/main/best_model.joblib"
 
 # Load the feature extractor model
-feature_extractor = tf.keras.models.load_model(feature_extractor_path)
+try:
+    feature_extractor = tf.keras.models.load_model(feature_extractor_path)
+    st.success("MobileNetV2 model loaded successfully!")
+except Exception as e:
+    st.error(f"Error loading MobileNetV2 model: {e}")
 
 # Load the SVM model
-svm_model = joblib.load(svm_model_path)
+try:
+    svm_model = joblib.load(svm_model_path)
+    st.success("SVM model loaded successfully!")
+except Exception as e:
+    st.error(f"Error loading SVM model: {e}")
 
 # Define a function to preprocess an image
 def preprocess_image(image):
-    # Convert image to RGB if it has more than 3 channels
-    if image.mode != 'RGB':
-        image = image.convert('RGB')
-    
-    # Resize image to IMG_SIZE
-    img = image.resize(IMG_SIZE)
-    
-    # Convert image to numpy array and normalize
-    img_array = np.array(img)
-    img_array = np.expand_dims(img_array, axis=0)
-    img_array = img_array / 255.0
-    
-    return img_array
-
+    try:
+        # Convert image to RGB if it has more than 3 channels
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+        
+        # Resize image to IMG_SIZE
+        img = image.resize(IMG_SIZE)
+        
+        # Convert image to numpy array and normalize
+        img_array = np.array(img)
+        img_array = np.expand_dims(img_array, axis=0)
+        img_array = img_array / 255.0
+        
+        return img_array
+    except Exception as e:
+        st.error(f"Error preprocessing image: {e}")
 
 # Define a function to predict image class
 def predict_image(image_array):
-    # Extract features using the pretrained model
-    features = feature_extractor.predict(image_array)
-    features = features.reshape((1, -1))
+    try:
+        # Extract features using the pretrained model
+        features = feature_extractor.predict(image_array)
+        features = features.reshape((1, -1))
 
-    # Predict class using SVM model
-    prediction = svm_model.predict(features)
-    class_labels = ['Glass Bottle', 'Plastic Bottle', 'Tin Can']
-    
-    return class_labels[prediction[0]]
+        # Predict class using SVM model
+        prediction = svm_model.predict(features)
+        class_labels = ['Glass Bottle', 'Plastic Bottle', 'Tin Can']
+        
+        return class_labels[prediction[0]]
+    except Exception as e:
+        st.error(f"Error predicting image class: {e}")
 
 # Streamlit app with dropdown menu for image input
 def main():
@@ -60,17 +73,20 @@ def main():
         uploaded_file = st.file_uploader("Choose an image", type=["jpg", "jpeg", "png"])
 
         if uploaded_file is not None:
-            # Convert uploaded file to PIL Image
-            image = Image.open(uploaded_file)
-            st.image(image, caption="Uploaded Image", use_column_width=True)
+            try:
+                # Convert uploaded file to PIL Image
+                image = Image.open(uploaded_file)
+                st.image(image, caption="Uploaded Image", use_column_width=True)
 
-            # Preprocess the image
-            img_array = preprocess_image(image)
+                # Preprocess the image
+                img_array = preprocess_image(image)
 
-            # Make predictions on the uploaded image
-            if st.button("Predict"):
-                predicted_class = predict_image(img_array)
-                st.success(f"Predicted Class: {predicted_class}")
+                # Make predictions on the uploaded image
+                if st.button("Predict"):
+                    predicted_class = predict_image(img_array)
+                    st.success(f"Predicted Class: {predicted_class}")
+            except Exception as e:
+                st.error(f"Error handling uploaded image: {e}")
 
     elif input_method == "Predict from URL":
         # Input URL for image
@@ -96,7 +112,7 @@ def main():
                     st.error(f"Error: Unable to fetch image from URL. Status code: {response.status_code}")
 
             except Exception as e:
-                st.error(f"Error: {e}")
+                st.error(f"Error handling URL input: {e}")
 
 if __name__ == "__main__":
     main()
