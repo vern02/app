@@ -5,7 +5,9 @@ numpy
 tensorflow
 requests
 
-streamlit
-pillow
-tensorflow
-joblib
+streamlit==0.93.0
+joblib==1.0.1
+pillow==8.4.0
+numpy==1.22.2
+scikit-learn==0.24.2
+streamlit-extras==0.1.0
