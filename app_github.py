@@ -1,57 +1,102 @@
-import os
 import streamlit as st
 import joblib
-from streamlit_extras.let_it_rain import rain
+from PIL import Image
+import numpy as np
+import tensorflow as tf
+import requests
+from io import BytesIO
 
-# Define the full path to the TF-IDF vectorizer and Logistics regression model files
-tfidf_path = "/Users/vernsin/TfIdf_Vectorizer.joblib"
-logreg_path = "/Users/vernsin/Logistics_Regression_Model.joblib"
+# Define the image size for the model
+IMG_SIZE = (224, 224)
 
-# Check if the files exist before trying to load them
-if os.path.exists(tfidf_path):
-    # Load the TF-IDF vectorizer
-    vectorizer = joblib.load(tfidf_path)
-else:
-    st.error("TF-IDF vectorizer file not found!")
+# Define the paths to the models
+feature_extractor_path = "/Users/vernsin/mobilenetv2.h5"  # Replace with your actual path
+svm_model_path = "/Users/vernsin/best_model.joblib"  # Replace with your actual path
 
-if os.path.exists(logreg_path):
-    # Load the Logistics Regression model
-    best_model = joblib.load(logreg_path)
-else:
-    st.error("Logistics Regression model file not found!")
+# Load the feature extractor model
+feature_extractor = tf.keras.models.load_model(feature_extractor_path)
 
-def predict_sentiment(text):
-    text_vectorized = vectorizer.transform([text])
-    prediction = best_model.predict(text_vectorized)
-    return prediction
+# Load the SVM model
+svm_model = joblib.load(svm_model_path)
 
-st.title("Senti Analyzer")
-
-with st.form("sentiment_form"):
-    user_input = st.text_area("Enter a movie review:")
+# Define a function to preprocess an image
+def preprocess_image(image):
+    # Convert image to RGB if it has more than 3 channels
+    if image.mode != 'RGB':
+        image = image.convert('RGB')
     
-    submitted = st.form_submit_button("Predict Sentiment")
+    # Resize image to IMG_SIZE
+    img = image.resize(IMG_SIZE)
+    
+    # Convert image to numpy array and normalize
+    img_array = np.array(img)
+    img_array = np.expand_dims(img_array, axis=0)
+    img_array = img_array / 255.0
+    
+    return img_array
 
-    if submitted and user_input.strip():  # Check if the user input is not empty
-        sentiment = predict_sentiment(user_input)
 
-        if sentiment == 1:
-            sentiment_label = "Positive"
-            st.success("The given movie review has positive sentiments! 😊")
-            rain(
-                emoji = "😊",
-                font_size = 20,
-                falling_speed = 2,
-                animation_length = "infinite")
-        else:
-            sentiment_label = "Negative"
-            st.warning("The given movie review has negative sentiments! 😞")
-            rain(
-                emoji = "😞",
-                font_size = 20,
-                falling_speed = 2,
-                animation_length = "infinite")
+# Define a function to predict image class
+def predict_image(image_array):
+    # Extract features using the pretrained model
+    features = feature_extractor.predict(image_array)
+    features = features.reshape((1, -1))
 
-        st.write(f'Sentiment: {sentiment_label}')
-    elif submitted:
-        st.warning("Please enter a movie review before predicting sentiment.")
+    # Predict class using SVM model
+    prediction = svm_model.predict(features)
+    class_labels = ['Glass Bottle', 'Plastic Bottle', 'Tin Can']
+    
+    return class_labels[prediction[0]]
+
+# Streamlit app with dropdown menu for image input
+def main():
+    st.title("Object Classification")
+
+    # Dropdown to select image input method
+    input_method = st.selectbox("Choose Image Input Method", ("Please Select", "Upload Image", "Predict from URL"))
+
+    if input_method == "Upload Image":
+        # File uploader widget
+        uploaded_file = st.file_uploader("Choose an image", type=["jpg", "jpeg", "png"])
+
+        if uploaded_file is not None:
+            # Convert uploaded file to PIL Image
+            image = Image.open(uploaded_file)
+            st.image(image, caption="Uploaded Image", use_column_width=True)
+
+            # Preprocess the image
+            img_array = preprocess_image(image)
+
+            # Make predictions on the uploaded image
+            if st.button("Predict"):
+                predicted_class = predict_image(img_array)
+                st.success(f"Predicted Class: {predicted_class}")
+
+    elif input_method == "Predict from URL":
+        # Input URL for image
+        url = st.text_input("Enter Image URL")
+
+        if url:
+            try:
+                # Fetch image from URL
+                response = requests.get(url)
+                if response.status_code == 200:
+                    # Read image from response content
+                    image = Image.open(BytesIO(response.content))
+                    st.image(image, caption="Image from URL", use_column_width=True)
+
+                    # Preprocess the image
+                    img_array = preprocess_image(image)
+
+                    # Predict button to trigger prediction
+                    if st.button("Predict"):
+                        predicted_class = predict_image(img_array)
+                        st.success(f"Predicted Class: {predicted_class}")
+                else:
+                    st.error(f"Error: Unable to fetch image from URL. Status code: {response.status_code}")
+
+            except Exception as e:
+                st.error(f"Error: {e}")
+
+if __name__ == "__main__":
+    main()
