@@ -9,9 +9,9 @@ from io import BytesIO
 # Define the image size for the model
 IMG_SIZE = (224, 224)
 
-# Define the paths to the models
-feature_extractor_path = "/Users/vernsin/mobilenetv2.h5"  # Replace with your actual path
-svm_model_path = "/Users/vernsin/best_model.joblib"  # Replace with your actual path
+# Define the paths to the models (replace with cloud paths if different)
+feature_extractor_path = "/Users/vernsin/mobilenetv2.h5"
+svm_model_path = "/Users/vernsin/best_model.joblib"
 
 # Load the feature extractor model
 feature_extractor = tf.keras.models.load_model(feature_extractor_path)
@@ -34,7 +34,6 @@ def preprocess_image(image):
     img_array = img_array / 255.0
     
     return img_array
-
 
 # Define a function to predict image class
 def predict_image(image_array):
